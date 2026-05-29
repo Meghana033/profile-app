@@ -1,35 +1,77 @@
-function Overview({ profile, loading }) {
+const Overview = ({
+  profile,
+  loading
+}) => {
+
+  // Loading State
   if (loading) {
-    return <h2>Loading profile...</h2>;
+
+    return (
+      <div className="loading-box">
+        <h2>Fetching Profile Data...</h2>
+      </div>
+    );
   }
 
+  // No Profile
   if (!profile) {
-    return null;
+
+    return (
+      <div className="empty-profile">
+        <p>User profile not available</p>
+      </div>
+    );
   }
 
   return (
-    <div className="card">
-      <img
-        src={profile.avatar_url}
-        alt={profile.login}
-        className="avatar"
-      />
 
-      <h2>{profile.name}</h2>
+    <section className="profile-card">
 
-      <p>{profile.bio}</p>
+      <div className="profile-image">
 
-      <div className="stats">
-        <p>
-          Followers: {profile.followers}
+        <img
+          src={profile.avatar_url}
+          alt={profile.login}
+          className="avatar"
+        />
+
+      </div>
+
+      <div className="profile-details">
+
+        <h2>{profile.name}</h2>
+
+        <p className="username">
+          @{profile.login}
         </p>
 
-        <p>Following: {profile.following}</p>
+        <p className="bio">
+          {profile.bio || "No bio added"}
+        </p>
 
-        <p>Repositories: {profile.public_repos}</p>
+        <div className="profile-stats">
+
+          <div className="stat-box">
+            <h4>Followers</h4>
+            <span>{profile.followers}</span>
+          </div>
+
+          <div className="stat-box">
+            <h4>Following</h4>
+            <span>{profile.following}</span>
+          </div>
+
+          <div className="stat-box">
+            <h4>Repositories</h4>
+            <span>{profile.public_repos}</span>
+          </div>
+
+        </div>
+
       </div>
-    </div>
+
+    </section>
   );
-}
+};
 
 export default Overview;
