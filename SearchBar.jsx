@@ -1,30 +1,58 @@
 import { useState } from "react";
 
-function SearchBar({ setUsername }) {
-  const [input, setInput] = useState("");
+const SearchBar = ({
+  setUsername
+}) => {
 
-  const handleSearch = () => {
-    if (input.trim() !== "") {
-      setUsername(input);
+  const [searchValue, setSearchValue] =
+    useState("");
+
+  // Handle Search
+  const handleUserSearch = () => {
+
+    const trimmedValue =
+      searchValue.trim();
+
+    if (trimmedValue) {
+
+      setUsername(trimmedValue);
+
+      setSearchValue("");
+    }
+  };
+
+  // Enter Key Support
+  const handleKeyDown = (event) => {
+
+    if (event.key === "Enter") {
+      handleUserSearch();
     }
   };
 
   return (
-    <div className="search-box">
+
+    <section className="search-container">
+
       <input
         type="text"
-        placeholder="Enter GitHub username"
-        value={input}
-        onChange={(e) =>
-          setInput(e.target.value)
+        className="search-input"
+        placeholder="Search GitHub Profile..."
+        value={searchValue}
+        onChange={(event) =>
+          setSearchValue(event.target.value)
         }
+        onKeyDown={handleKeyDown}
       />
 
-      <button onClick={handleSearch}>
-        Search
+      <button
+        className="search-button"
+        onClick={handleUserSearch}
+      >
+        Find User
       </button>
-    </div>
+
+    </section>
   );
-}
+};
 
 export default SearchBar;
