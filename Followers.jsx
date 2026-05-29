@@ -1,28 +1,62 @@
-function Followers({
+const Followers = ({
   followers,
-  loading,
-}) {
+  loading
+}) => {
+
+  // Loading State
   if (loading) {
-    return <h2>Loading followers...</h2>;
+
+    return (
+      <div className="loading">
+        <h2>Fetching Followers...</h2>
+      </div>
+    );
+  }
+
+  // Empty Followers
+  if (!followers.length) {
+
+    return (
+      <div className="empty-state">
+        <p>No followers available</p>
+      </div>
+    );
   }
 
   return (
-    <div className="followers-container">
-      {followers.map((follower) => (
-        <div
-          className="follower-card"
-          key={follower.id}
-        >
-          <img
-            src={follower.avatar_url}
-            alt={follower.login}
-          />
 
-          <p>{follower.login}</p>
-        </div>
-      ))}
-    </div>
+    <section className="followers-wrapper">
+
+      {
+        followers.map((user) => (
+
+          <article
+            className="follower-box"
+            key={user.id}
+          >
+
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              className="avatar"
+            />
+
+            <h3>{user.login}</h3>
+
+            <a
+              href={user.html_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View Profile
+            </a>
+
+          </article>
+        ))
+      }
+
+    </section>
   );
-}
+};
 
 export default Followers;
