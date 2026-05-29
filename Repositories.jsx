@@ -1,23 +1,79 @@
-function Repositories({ repos, loading }) {
+const Repositories = ({
+  repos,
+  loading
+}) => {
+
+  // Loading State
   if (loading) {
-    return <h2>Loading repositories...</h2>;
+
+    return (
+      <div className="loading-section">
+        <h2>Fetching Repositories...</h2>
+      </div>
+    );
+  }
+
+  // Empty Repository List
+  if (!repos.length) {
+
+    return (
+      <div className="empty-repos">
+        <p>No repositories found</p>
+      </div>
+    );
   }
 
   return (
-    <div className="repo-container">
-      {repos.map((repo) => (
-        <div className="repo-card" key={repo.id}>
-          <h3>{repo.name}</h3>
 
-          <p>
-            Language: {repo.language || "N/A"}
-          </p>
+    <section className="repositories-wrapper">
 
-          <p>Stars: {repo.stargazers_count}</p>
-        </div>
-      ))}
-    </div>
+      {
+        repos.map((repository) => (
+
+          <article
+            className="repository-card"
+            key={repository.id}
+          >
+
+            <h3 className="repo-title">
+              {repository.name}
+            </h3>
+
+            <p className="repo-language">
+
+              <strong>Primary Language:</strong>
+
+              {
+                repository.language
+                  ? repository.language
+                  : "Not Specified"
+              }
+
+            </p>
+
+            <p className="repo-stars">
+
+              <strong>Stars:</strong>
+
+              {repository.stargazers_count}
+
+            </p>
+
+            <a
+              href={repository.html_url}
+              target="_blank"
+              rel="noreferrer"
+              className="repo-link"
+            >
+              Open Repository
+            </a>
+
+          </article>
+        ))
+      }
+
+    </section>
   );
-}
+};
 
 export default Repositories;
