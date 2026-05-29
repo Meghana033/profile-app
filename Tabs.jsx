@@ -1,46 +1,44 @@
-function Tabs({ activeTab, setActiveTab }) {
+const Tabs = ({
+  activeTab,
+  setActiveTab
+}) => {
+
+  const tabItems = [
+    "overview",
+    "repositories",
+    "followers"
+  ];
+
   return (
-    <div className="tabs">
-      <button
-        className={
-          activeTab === "overview"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setActiveTab("overview")
-        }
-      >
-        Overview
-      </button>
 
-      <button
-        className={
-          activeTab === "repositories"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setActiveTab("repositories")
-        }
-      >
-        Repositories
-      </button>
+    <section className="tabs-container">
 
-      <button
-        className={
-          activeTab === "followers"
-            ? "active"
-            : ""
-        }
-        onClick={() =>
-          setActiveTab("followers")
-        }
-      >
-        Followers
-      </button>
-    </div>
+      {
+        tabItems.map((tab) => (
+
+          <button
+            key={tab}
+            className={
+              activeTab === tab
+                ? "tab-button active-tab"
+                : "tab-button"
+            }
+            onClick={() =>
+              setActiveTab(tab)
+            }
+          >
+
+            {
+              tab.charAt(0).toUpperCase() +
+              tab.slice(1)
+            }
+
+          </button>
+        ))
+      }
+
+    </section>
   );
-}
+};
 
 export default Tabs;
