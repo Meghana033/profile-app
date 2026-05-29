@@ -1,183 +1,203 @@
 import { useEffect, useState } from "react";
+
 import SearchBar from "./components/SearchBar";
 import Tabs from "./components/Tabs";
+
 import Overview from "./components/Overview";
 import Repositories from "./components/Repositories";
 import Followers from "./components/Followers";
 
-function App() {
+const App = () => {
+
+  // Username State
   const [username, setUsername] = useState("octocat");
 
-  const [profile, setProfile] = useState(null);
-  const [repos, setRepos] = useState([]);
-  const [followers, setFollowers] = useState([]);
+  // Data States
+  const [profileData, setProfileData] = useState(null);
+  const [repoData, setRepoData] = useState([]);
+  const [followersData, setFollowersData] = useState([]);
 
-  const [activeTab, setActiveTab] = useState("overview");
+  // Loading States
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isRepoLoading, setIsRepoLoading] = useState(false);
+  const [isFollowersLoading, setIsFollowersLoading] = useState(false);
 
-  const [loadingProfile, setLoadingProfile] = useState(false);
-  const [loadingRepos, setLoadingRepos] = useState(false);
-  const [loadingFollowers, setLoadingFollowers] = useState(false);
+  // UI States
+  const [currentTab, setCurrentTab] = useState("overview");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [error, setError] = useState("");
-
-  // Persistent Scroll
+  // Restore Scroll Position
   useEffect(() => {
-    const savedScroll = sessionStorage.getItem("scroll-position");
 
-    if (savedScroll) {
-      window.scrollTo(0, Number(savedScroll));
+    const scrollValue =
+      sessionStorage.getItem("github-scroll");
+
+    if (scrollValue) {
+      window.scrollTo(0, parseInt(scrollValue));
     }
 
-    const handleScroll = () => {
+    const saveScroll = () => {
       sessionStorage.setItem(
-        "scroll-position",
+        "github-scroll",
         window.scrollY
       );
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", saveScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        saveScroll
+      );
     };
+
   }, []);
+
+  // Generic Fetch Function
+  const fetchGithubData = async (
+    url,
+    setData,
+    setLoading,
+    showError = false
+  ) => {
+
+    const controller = new AbortController();
+
+    try {
+
+      setLoading(true);
+
+      const response = await fetch(url, {
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+
+        if (showError) {
+          throw new Error("GitHub User Not Found");
+        }
+
+        return;
+      }
+
+      const data = await response.json();
+
+      setData(data);
+
+    } catch (error) {
+
+      if (error.name !== "AbortError") {
+
+        if (showError) {
+          setErrorMessage(error.message);
+        }
+
+        console.log(error);
+      }
+
+    } finally {
+
+      setLoading(false);
+    }
+
+    return () => controller.abort();
+  };
 
   // Fetch Profile
   useEffect(() => {
-    const controller = new AbortController();
 
-    const fetchProfile = async () => {
-      try {
-        setLoadingProfile(true);
-        setError("");
+    setErrorMessage("");
 
-        const response = await fetch(
-          `https://api.github.com/users/${username}`,
-          {
-            signal: controller.signal,
-          }
-        );
+    fetchGithubData(
+      `https://api.github.com/users/${username}`,
+      setProfileData,
+      setIsProfileLoading,
+      true
+    );
 
-        if (!response.ok) {
-          throw new Error("User not found");
-        }
-
-        const data = await response.json();
-
-        setProfile(data);
-      } catch (err) {
-        if (err.name !== "AbortError") {
-          setError(err.message);
-        }
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
-
-    fetchProfile();
-
-    return () => controller.abort();
   }, [username]);
 
   // Fetch Repositories
   useEffect(() => {
-    const controller = new AbortController();
 
-    const fetchRepos = async () => {
-      try {
-        setLoadingRepos(true);
+    fetchGithubData(
+      `https://api.github.com/users/${username}/repos`,
+      setRepoData,
+      setIsRepoLoading
+    );
 
-        const response = await fetch(
-          `https://api.github.com/users/${username}/repos`,
-          {
-            signal: controller.signal,
-          }
-        );
-
-        const data = await response.json();
-
-        setRepos(data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoadingRepos(false);
-      }
-    };
-
-    fetchRepos();
-
-    return () => controller.abort();
   }, [username]);
 
   // Fetch Followers
   useEffect(() => {
-    const controller = new AbortController();
 
-    const fetchFollowers = async () => {
-      try {
-        setLoadingFollowers(true);
+    fetchGithubData(
+      `https://api.github.com/users/${username}/followers`,
+      setFollowersData,
+      setIsFollowersLoading
+    );
 
-        const response = await fetch(
-          `https://api.github.com/users/${username}/followers`,
-          {
-            signal: controller.signal,
-          }
-        );
-
-        const data = await response.json();
-
-        setFollowers(data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoadingFollowers(false);
-      }
-    };
-
-    fetchFollowers();
-
-    return () => controller.abort();
   }, [username]);
 
   return (
+
     <div className="container">
+
       <h1 className="title">
-        GitHub Profile Dashboard
+        GitHub Explorer Dashboard
       </h1>
 
       <SearchBar setUsername={setUsername} />
 
-      {error && <p className="error">{error}</p>}
+      {
+        errorMessage &&
+        <p className="error">
+          {errorMessage}
+        </p>
+      }
 
       <Tabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        activeTab={currentTab}
+        setActiveTab={setCurrentTab}
       />
 
-      <div className="content">
-        {activeTab === "overview" && (
-          <Overview
-            profile={profile}
-            loading={loadingProfile}
-          />
-        )}
+      <div className="content-area">
 
-        {activeTab === "repositories" && (
-          <Repositories
-            repos={repos}
-            loading={loadingRepos}
-          />
-        )}
+        {
+          currentTab === "overview" && (
 
-        {activeTab === "followers" && (
-          <Followers
-            followers={followers}
-            loading={loadingFollowers}
-          />
-        )}
+            <Overview
+              profile={profileData}
+              loading={isProfileLoading}
+            />
+          )
+        }
+
+        {
+          currentTab === "repositories" && (
+
+            <Repositories
+              repos={repoData}
+              loading={isRepoLoading}
+            />
+          )
+        }
+
+        {
+          currentTab === "followers" && (
+
+            <Followers
+              followers={followersData}
+              loading={isFollowersLoading}
+            />
+          )
+        }
+
       </div>
+
     </div>
   );
-}
+};
 
 export default App;
