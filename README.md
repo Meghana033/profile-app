@@ -1,1 +1,2 @@
-# profile-app
+# github-profile-app
+
